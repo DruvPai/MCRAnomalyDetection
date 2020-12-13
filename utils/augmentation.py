@@ -3,14 +3,14 @@ import time
 import sys
 
 import torch
-import numpy as np 
+import numpy as np
 from PIL import Image
 import torchvision.transforms as transforms
 
 
 class AugmentLoader:
     """Dataloader that includes augmentation functionality.
-    
+
     Parameters:
         dataset (torch.data.dataset): trainset or testset PyTorch object
         batch_size (int): the size of each batch, including augmentations
@@ -20,7 +20,7 @@ class AugmentLoader:
         transforms (torchvision.transforms): Transformations applied to each augmentation
         num_aug (int): number of augmentation for each image in a batch
         shuffle (bool): shuffle data
-        
+
     Attributes:
         dataset (torch.data.dataset): trainset or testset PyTorch object
         batch_size (int): the size of each batch, including augmentations
@@ -31,22 +31,22 @@ class AugmentLoader:
         sample_indices (np.ndarray): indices for sampling
 
     Notes:
-        - number of augmetations and batch size are used to calculate the number of original 
+        - number of augmetations and batch size are used to calculate the number of original
         images used in a batch
-        - if num_aug = 0, then this dataloader is the same as an PyTorch dataloader, with 
-        the number of original images equal to the batch size, and each image is transformed 
+        - if num_aug = 0, then this dataloader is the same as an PyTorch dataloader, with
+        the number of original images equal to the batch size, and each image is transformed
         using transforms from object argument.
-        - Auygmentloder first samples from the dataset num_img of images, then apply augmentation 
-        to all images. The first augmentation is always the identity transform. 
+        - Auygmentloder first samples from the dataset num_img of images, then apply augmentation
+        to all images. The first augmentation is always the identity transform.
 
     """
-    def __init__(self, 
-              dataset, 
-              batch_size,
-              sampler="random",
-              transforms=transforms.ToTensor(),
-              num_aug=0, 
-              shuffle=False):
+    def __init__(self,
+                 dataset,
+                 batch_size,
+                 sampler="random",
+                 transforms=transforms.ToTensor(),
+                 num_aug=0,
+                 shuffle=False):
 
         self.dataset = dataset
         self.batch_size = batch_size
@@ -54,7 +54,7 @@ class AugmentLoader:
         self.sampler = sampler
         self.num_aug = num_aug
         self.shuffle = shuffle
-    
+
     def __iter__(self):
         if self.sampler == "balance":
             sampler = BalanceSampler(self.dataset)
@@ -79,7 +79,7 @@ class AugmentLoader:
             transformed = self.transforms(sample)
             batch_imgs.append(transformed.unsqueeze(0))
         return torch.cat(batch_imgs, axis=0)
-    
+
 
 class _Iter():
     def __init__(self, loader, sampler, num_img, num_aug, size=None):
@@ -110,7 +110,7 @@ class _Iter():
 
 
 class BalanceSampler():
-    """Samples data such that each class has the same number of samples. Performs sampling 
+    """Samples data such that each class has the same number of samples. Performs sampling
     by first sorting data then unfiormly sample from batch with replacement."""
     def __init__(self, dataset):
         self.dataset = dataset
@@ -155,7 +155,7 @@ class BalanceSampler():
 
 class RandomSampler():
     """Samples data randomly. Sampler initializes sample indices when Sampler is instantiated.
-    Sample indices are shuffled if shuffle option is True. Performs sampling by popping off 
+    Sample indices are shuffled if shuffle option is True. Performs sampling by popping off
     first index each time."""
     def __init__(self, dataset, size, shuffle=False):
         self.dataset = dataset
@@ -169,7 +169,7 @@ class RandomSampler():
             return np.random.choice(len(self.dataset.targets), self.size, replace=False).tolist()
         else:
             return np.arange(self.size).tolist()
-        
+
     def sample(self, num_img):
         indices = [self.sample_indices.pop(0) for _ in range(num_img)]
         batch_imgs, batch_lbls = [], []
