@@ -75,7 +75,7 @@ def load_checkpoint(model_dir, epoch=None, eval_=False):
     params = load_params(model_dir)
     print('Loading checkpoint: {}'.format(ckpt_path))
     state_dict = torch.load(ckpt_path)
-    net = load_architectures(params['arch'], params['feature_dim'])
+    net = load_architectures(params['arch'], params['fd'])
     net.load_state_dict(state_dict)
     del state_dict
     if eval_:
@@ -117,8 +117,8 @@ def update_params(model_dir, pretrain_dir):
     to new directory. """
     params = load_params(model_dir)
     old_params = load_params(pretrain_dir)
-    params['arch'] = old_params["arch"]
-    params['feature_dim'] = old_params['feature_dim']
+    params['arch'] = old_params['arch']
+    params['fd'] = old_params['fd']
     save_params(model_dir, params)
 
 def load_params(model_dir):

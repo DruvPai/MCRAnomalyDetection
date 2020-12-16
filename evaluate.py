@@ -60,7 +60,7 @@ def anomaly_detection(model_dir: str, out: str, epoch: int = None, data_dir: str
     train_features, train_labels = utils.model.get_features(net, trainloader)
 
     anomaly_detector = AnomalyDetection()
-    anomaly_detector.fit(train_features, train_labels, params['eps_sq'])
+    anomaly_detector.fit(train_features, train_labels, params['eps'])
 
     # get test features and labels
     test_transforms = utils.dataset.load_transforms('test')
@@ -85,9 +85,9 @@ def anomaly_detection(model_dir: str, out: str, epoch: int = None, data_dir: str
     return in_scores, out_scores
 
 
-# train.supervised_train({'arch': 'resnet18', 'data': 'cifar100', 'feature_dim': 128, 'epochs': 500, 'batch_size': 1000, 'eps_sq': 0.5, 'gamma_1': 1., 'gamma_2': 1., 'learning_rate': 0.01, 'label_corruption_ratio': 0.0})
+# train.supervised_train({'arch': 'resnet18', 'data': 'cifar10', 'fd': 128, 'epo': 20, 'bs': 500, 'eps': 0.5, 'gam1': 1., 'gam2': 1, 'lr': 0.01, 'transform': 'cifar'})
 # model_dir = './saved_models_done/sup_resnet18+128_cifar10_epo500_bs1000_lr0.01_mom0.9_wd0.0005_gam11.0_gam21.0_eps0.5_lcr0.0'
-model_dir = './saved_models/sup_resnet18+128_cifar10_epo500_bs1000_lr0.01_mom0.9_wd0.0005_gam11.0_gam21.0_eps0.5_lcr0.0'
-out = "cifar100"
-in_scores, out_scores = anomaly_detection(model_dir, out)
-print(ood_metrics(in_scores, out_scores))
+# model_dir = './saved_models/sup_resnet18+128_cifar10_epo500_bs1000_lr0.01_mom0.9_wd0.0005_gam11.0_gam21.0_eps0.5_lcr0.0'
+# out = "cifar100"
+#in_scores, out_scores = anomaly_detection(model_dir, out)
+# print(ood_metrics(in_scores, out_scores))

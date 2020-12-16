@@ -22,45 +22,45 @@ def supervised_train(params: dict) -> None:
     #      save_dir: str = './saved_models/',
     #      data_dir: str = './data/', pretrain_dir: str = None, pretrain_epoch: int = None)
     arch = params.get('arch', 'resnet18')
-    feature_dim = params.get('feature_dim', 128)
+    feature_dim = params.get('fd', 128)
     data = params.get('data', 'cifar10')
-    epochs = params.get('epochs', 800)
-    batch_size = params.get('batch_size', 1000)
-    learning_rate = params.get('learning_rate', 0.001)
-    momentum = params.get('momentum', 0.9)
-    weight_decay = params.get('weight_decay', 5e-4)
+    epochs = params.get('epo', 800)
+    batch_size = params.get('bs', 1000)
+    learning_rate = params.get('lr', 0.001)
+    momentum = params.get('mom', 0.9)
+    weight_decay = params.get('wd', 5e-4)
     gamma_1 = params.get('gamma_1', 1.)
     gamma_2 = params.get('gamma_2', 1.)
-    eps_sq = params.get('eps_sq', 0.5)
-    corruption = params.get('corruption', 'default')
-    label_corruption_ratio = params.get('label_corruption_ratio', 0.)
-    label_corruption_seed = params.get('label_corruption_seed', 10)
+    eps_sq = params.get('eps', 0.5)
+    corruption = params.get('corrupt', 'default')
+    label_corruption_ratio = params.get('lcr', 0.)
+    label_corruption_seed = params.get('lcs', 10)
     tail = params.get('tail', '')
     transform = params.get('transform', 'default')
     save_dir = params.get('save_dir', './saved_models/')
     data_dir = params.get('data_dir', './data/')
     pretrain_dir = params.get('pretrain_dir', None)
-    pretrain_epoch = params.get('pretrain_epoch', None)
+    pretrain_epoch = params.get('pretrain_epo', None)
     params['arch'] = arch
-    params['feature_dim'] = feature_dim
+    params['fd'] = feature_dim
     params['data'] = data
-    params['epochs'] = epochs
-    params['batch_size'] = batch_size
-    params['learning_rate'] = learning_rate
-    params['momentum'] = momentum
-    params['weight_decay'] = weight_decay
-    params['gamma_1'] = gamma_1
-    params['gamma_2'] = gamma_2
-    params['eps_sq'] = eps_sq
-    params['corruption'] = corruption
-    params['label_corruption_ratio'] = label_corruption_ratio
-    params['label_corruption_seed'] = label_corruption_seed
+    params['epo'] = epochs
+    params['bs'] = batch_size
+    params['lr'] = learning_rate
+    params['mom'] = momentum
+    params['wd'] = weight_decay
+    params['gam1'] = gamma_1
+    params['gam2'] = gamma_2
+    params['eps'] = eps_sq
+    params['corrupt'] = corruption
+    params['lcr'] = label_corruption_ratio
+    params['lcs'] = label_corruption_seed
     params['tail'] = tail
     params['transform'] = transform
     params['save_dir'] = save_dir
     params['data_dir'] = data_dir
     params['pretrain_dir'] = pretrain_dir
-    params['pretrain_epoch'] = pretrain_epoch
+    params['pretrain_epo'] = pretrain_epoch
 
     # initialize pipeline
     model_dir = os.path.join(save_dir,
@@ -113,43 +113,43 @@ def self_supervised_train(params: dict) -> None:
     #           save_dir: str = './saved_models/',
     #           data_dir: str = './data/', pretrain_dir: str = None, pretrain_epoch: int = None)
     arch = params.get('arch', 'resnet18')
-    feature_dim = params.get('feature_dim', 128)
+    feature_dim = params.get('fd', 32)
     data = params.get('data', 'cifar10')
-    epochs = params.get('epochs', 800)
-    batch_size = params.get('batch_size', 1000)
-    augmentations_per_mini_batch = params.get('augmentations_per_mini_batch', 50)
-    learning_rate = params.get('learning_rate', 0.001)
-    momentum = params.get('momentum', 0.9)
-    weight_decay = params.get('weight_decay', 5e-4)
-    gamma_1 = params.get('gamma_1', 1.)
-    gamma_2 = params.get('gamma_2', 1.)
-    eps_sq = params.get('eps_sq', 0.5)
+    epochs = params.get('epo', 50)
+    batch_size = params.get('bs', 1000)
+    augmentations_per_mini_batch = params.get('aug', 50)
+    learning_rate = params.get('lr', 0.001)
+    momentum = params.get('mom', 0.9)
+    weight_decay = params.get('wd', 5e-4)
+    gamma_1 = params.get('gam1', 1.)
+    gamma_2 = params.get('gam2', 10.)
+    eps_sq = params.get('eps', 0.5)
     sampler = params.get('sampler', 'random')
     tail = params.get('tail', '')
     transform = params.get('transform', 'default')
     save_dir = params.get('save_dir', './saved_models/')
     data_dir = params.get('data_dir', './data/')
     pretrain_dir = params.get('pretrain_dir', None)
-    pretrain_epoch = params.get('pretrain_epoch', None)
+    pretrain_epoch = params.get('pretrain_epo', None)
     params['arch'] = arch
-    params['feature_dim'] = feature_dim
+    params['fd'] = feature_dim
     params['data'] = data
-    params['epochs'] = epochs
-    params['batch_size'] = batch_size
-    params['augmentations_per_mini_batch'] = augmentations_per_mini_batch
-    params['learning_rate'] = learning_rate
-    params['momentum'] = momentum
-    params['weight_decay'] = weight_decay
-    params['gamma_1'] = gamma_1
-    params['gamma_2'] = gamma_2
-    params['eps_sq'] = eps_sq
+    params['epo'] = epochs
+    params['bs'] = batch_size
+    params['aug'] = augmentations_per_mini_batch
+    params['lr'] = learning_rate
+    params['mom'] = momentum
+    params['wd'] = weight_decay
+    params['gam1'] = gamma_1
+    params['gam2'] = gamma_2
+    params['eps'] = eps_sq
     params['sampler'] = sampler
     params['tail'] = tail
     params['transform'] = transform
     params['save_dir'] = save_dir
     params['data_dir'] = data_dir
     params['pretrain_dir'] = pretrain_dir
-    params['pretrain_epoch'] = pretrain_epoch
+    params['pretrain_epo'] = pretrain_epoch
 
     # initialize pipelines
     model_dir = os.path.join(save_dir,
@@ -178,7 +178,7 @@ def self_supervised_train(params: dict) -> None:
 
     # train
     print("Starting training")
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
         for step, (batch_imgs, _, batch_idx) in enumerate(trainloader):
             batch_features = net(batch_imgs.cuda())
             loss, loss_empi, loss_theo = criterion(batch_features, batch_idx)
