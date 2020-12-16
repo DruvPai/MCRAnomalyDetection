@@ -43,7 +43,7 @@ class MaximalCodingRateReduction(torch.nn.Module):
         theo_disc_loss = self.theoretical_discriminative_loss(Z)
         comp_loss = self.compressive_loss(Z, Pi)
 
-        emp_total_loss = comp_loss - self.gamma_2 * comp_loss
+        emp_total_loss = comp_loss - self.gamma_2 * emp_disc_loss
         return (emp_total_loss,
                 [emp_disc_loss.item(), comp_loss.item()],
                 [theo_disc_loss.item(), comp_loss.item()]
