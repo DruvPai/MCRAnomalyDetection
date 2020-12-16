@@ -13,8 +13,8 @@ class MaximalCodingRateReduction(torch.nn.Module):
 
     def discriminative_loss(self, Z: torch.tensor, gamma: float = 1) -> torch.tensor:
         m, p = Z.shape
-        I = torch.eye(p).cuda()
-        return torch.logdet(I + gamma * p / (m * self.eps) * Z.T.matmul(Z)) / 2
+        identity = torch.eye(p).cuda()
+        return torch.logdet(identity + gamma * p / (m * self.eps) * Z.T.matmul(Z)) / 2
 
     def empirical_discriminative_loss(self, Z: torch.tensor) -> torch.tensor:
         return self.discriminative_loss(Z, self.gamma_1)
@@ -25,11 +25,12 @@ class MaximalCodingRateReduction(torch.nn.Module):
     def compressive_loss(self, Z: torch.tensor, Pi: torch.tensor) -> torch.tensor:
         m, p = Z.shape
         k, _ = Pi.shape
-        I = torch.eye(p).cuda()
+        identity = torch.eye(p).cuda()
         compressive_loss = 0.
         for j in range(k):
             tr_Pi_j = torch.sum(Pi[j]) + self.INV_EPS
-            log_det = torch.logdet(I + p / (tr_Pi_j * self.eps) * Z.T.matmul(Z * Pi[j][:, None])) # hack to save memory https://stackoverflow.com/questions/53987906/how-to-multiply-row-wise-by-scalar-in-pytorch
+            # hack to save memory https://stackoverflow.com/questions/53987906/how-to-multiply-row-wise-by-scalar-in-pytorch
+            log_det = torch.logdet(identity + p / (tr_Pi_j * self.eps) * Z.T.matmul(Z * Pi[j][:, None])) 
             compressive_loss += log_det * tr_Pi_j / (2 * m)
         return compressive_loss
 

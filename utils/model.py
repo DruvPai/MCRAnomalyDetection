@@ -67,7 +67,9 @@ def load_checkpoint(model_dir, epoch=None, eval_=False):
     """
     if epoch is None: # get last epoch
         ckpt_dir = os.path.join(model_dir, 'checkpoints')
+        print(ckpt_dir)
         epochs = [int(e[11:-3]) for e in os.listdir(ckpt_dir) if e[-3:] == ".pt"]
+        print(epochs)
         epoch = np.sort(epochs)[-1]
     ckpt_path = os.path.join(model_dir, 'checkpoints', 'model-epoch{}.pt'.format(epoch))
     params = load_params(model_dir)

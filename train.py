@@ -86,6 +86,7 @@ def supervised_train(params: dict) -> None:
 
     # train
     print("Starting training")
+    
     for epoch in tqdm(range(epochs)):
         for step, (batch_imgs, batch_lbls) in enumerate(trainloader):
             features = net(batch_imgs.cuda())
@@ -96,7 +97,9 @@ def supervised_train(params: dict) -> None:
 
             utils.model.save_state(model_dir, epoch, step, loss.item(), *loss_empi, *loss_theo)
         scheduler.step()
-        utils.model.save_ckpt(model_dir, net, epoch)
+        if (epoch == epochs - 1) or (epoch % 100 == 0):
+            utils.model.save_ckpt(model_dir, net, epoch)
+    
     print("Training complete")
 
 
@@ -184,8 +187,9 @@ def self_supervised_train(params: dict) -> None:
             optimizer.step()
 
             utils.model.save_state(model_dir, epoch, step, loss.item(), *loss_empi, *loss_theo)
-            if step % 20 == 0:
-                utils.model.save_ckpt(model_dir, net, epoch)
+            # if step % 20 == 0:
+            #     utils.model.save_ckpt(model_dir, net, epoch)
         scheduler.step()
-        utils.model.save_ckpt(model_dir, net, epoch)
+        if (epoch == epochs - 1) or (epoch % 100 == 0):
+            utils.model.save_ckpt(model_dir, net, epoch)
     print("Training complete.")
