@@ -6,6 +6,7 @@ import train
 import utils.corruption
 import utils.dataset
 import utils.model
+import utils.plot
 import numpy as np
 
 def ood_labels(in_scores, out_scores):
@@ -74,7 +75,8 @@ def anomaly_detection(model_dir: str, out: str, epoch: int = None, data_dir: str
     outloader = DataLoader(outset, batch_size=500)
     out_features, out_labels = utils.model.get_features(net, outloader)
 
-    train_scores = anomaly_detector.scores.cpu().numpy()
+    train_scores = anomaly_detector.scores
+    train_scores = train_scores.cpu().numpy()
 
     in_scores = anomaly_detector.predict(test_features)
     in_scores = in_scores.cpu().numpy()
@@ -82,12 +84,17 @@ def anomaly_detection(model_dir: str, out: str, epoch: int = None, data_dir: str
     out_scores = anomaly_detector.predict(out_features)
     out_scores = out_scores.cpu().numpy()
 
-    return in_scores, out_scores
+    return train_scores, in_scores, out_scores
 
 
 # train.supervised_train({'arch': 'resnet18', 'data': 'cifar10', 'fd': 128, 'epo': 20, 'bs': 500, 'eps': 0.5, 'gam1': 1., 'gam2': 1, 'lr': 0.01, 'transform': 'cifar'})
-# model_dir = './saved_models_done/sup_resnet18+128_cifar10_epo500_bs1000_lr0.01_mom0.9_wd0.0005_gam11.0_gam21.0_eps0.5_lcr0.0'
+model_dir = './saved_models/sup_resnet18+128_cifar10_epo500_bs1000_lr0.01_mom0.9_wd0.0005_gam11.0_gam21.0_eps0.5_lcr0.0'
 # model_dir = './saved_models/sup_resnet18+128_cifar10_epo500_bs1000_lr0.01_mom0.9_wd0.0005_gam11.0_gam21.0_eps0.5_lcr0.0'
-# out = "cifar100"
-#in_scores, out_scores = anomaly_detection(model_dir, out)
-# print(ood_metrics(in_scores, out_scores))
+out = "cifar100"
+train_scores, in_scores, out_scores = anomaly_detection(model_dir, out)
+
+y_scores, y_true = ood_labels(in_scores, out_scores)
+utils.plot.plot_score_histograms('CIFAR10 vs CIFAR100', train_scores, in_scores, out_scores)
+utils.plot.plot_roc_curve('CIFAR10 vs CIFAR100', y_true, y_scores)
+utils.plot.plot_pr_curve('CIFAR10 vs CIFAR100', y_true, y_scores)
+print(ood_metrics(in_scores, out_scores))
