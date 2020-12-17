@@ -29,6 +29,12 @@ def load_trainset(name, transform=None, train=True, path="./data/"):
         trainset = torchvision.datasets.CIFAR100(root=os.path.join(path, "cifar100"), train=train,
                                                  download=True, transform=transform)
         trainset.num_classes = 100
+    elif _name == "svhn":
+        train_str = "train" if train else "test"
+        trainset = torchvision.datasets.SVHN(root=os.path.join(path, "svhn"), split=train_str,
+                                             download=True, transform=transform)
+        trainset.num_classes = 10
+        trainset.targets = trainset.labels
     elif _name == "cifar100coarse":
         trainset = torchvision.datasets.CIFAR100(root=os.path.join(path, "cifar100"), train=train,
                                                  download=True, transform=transform)
@@ -83,6 +89,13 @@ def load_transforms(name):
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor()])
     elif _name == "cifar":
+        transform = transforms.Compose([
+            transforms.RandomResizedCrop(32),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+            transforms.RandomGrayscale(p=0.2),
+            transforms.ToTensor()])
+    elif _name == "svhn":
         transform = transforms.Compose([
             transforms.RandomResizedCrop(32),
             transforms.RandomHorizontalFlip(p=0.5),
