@@ -14,7 +14,8 @@ class AnomalyDetection(BaseEstimator):
         pass
 
     def fit_predict(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> torch.tensor:
-        pass
+        self.fit(Z, Y, eps)
+        return self.predict(Z)
 
 
 class AnomalyDetectionMahalanobis(AnomalyDetection):
@@ -51,13 +52,6 @@ class AnomalyDetectionMahalanobis(AnomalyDetection):
         scores, _ = torch.min(preds, dim=1)
         return scores
 
-    def fit_predict(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> torch.tensor:
-        self.fit(Z, Y, eps)
-        scores = self.predict(Z)
-        print("mahalanobis train accuracy: %f" % torch.mean((scores == Y).float()).item())
-        return scores
-
-
 class AnomalyDetectionMICL(AnomalyDetection):
 
     def fit(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> torch.tensor:
@@ -72,16 +66,16 @@ class AnomalyDetectionMICL(AnomalyDetection):
 
         for j in range(k):
             idx = Y == j
-            self.L_eps[j] = self._L(Z[idx], eps) + torch.log2(torch.sum(idx) / m)
+            self.L_eps[j] = self._L(Z[idx]) + torch.log2(torch.sum(idx) / m)
 
-    def predict(self, Z: torch.tensor):
+    def predict(self, Z: torch.tensor) -> torch.tensor:
         m, p = Z.shape
         k = self.k
         preds = torch.zeros(m, k).cuda()
         preds -= self.L_eps
         for i in range(m):
             for j in range(k):
-                preds[i][j] += self._L(torch.cat(self.train_data[self.train_labels == j], Z[i][None, :]))
+                preds[i][j] += self._L(torch.cat((self.train_data[self.train_labels == j], Z[i][None, :])))
         return preds
 
     def _L(self, Z: torch.tensor) -> torch.tensor:
@@ -130,8 +124,32 @@ class AnomalyDetectionAsymptoticMICL(AnomalyDetection):
         scores, _ = torch.min(preds, dim=1)
         return scores
 
-    def fit_predict(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> torch.tensor:
-        self.fit(Z, Y, eps)
-        scores = self.predict(Z)
-        print("mahalanobis train accuracy: %f" % torch.mean((scores == Y).float()).item())
+class AnomalyDetectionSubspace(AnomalyDetection):
+
+    def fit(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> None:
+        m, p = Z.shape
+        k = len(Y.unique())
+        self.m = m
+        self.k = k
+        self.subspaces = []
+        for j in range(k):
+            Zj = Z[Y == j]
+            A = Zj.T.matmul(Zj)
+            rank = torch.matrix_rank(A, symmetric=True)
+            eigval, eigvec = torch.symeig(A, eigenvectors=True)
+            subspace = eigvec[-rank:].T # sorted in ascending order of eigenvalues
+            self.subspaces.append(subspace)
+
+    def predict(self, Z: torch.tensor) -> torch.tensor:
+        Zt = Z.T
+        m, p = Z.shape
+        k = self.k
+        preds = torch.zeros(m, k)
+        for j in range(k):
+            subspace = self.subspaces[j]
+            p, dim = subspace.shape
+            proj, _ = torch.lstsq(Zt, subspace)
+            preds[:, j] = torch.sum(torch.square(proj[dim:]), dim=0)
+            # see https://pytorch.org/docs/stable/generated/torch.lstsq.html the last m - n rows hold residuals
+        scores, _ = torch.min(preds, dim=1)
         return scores
