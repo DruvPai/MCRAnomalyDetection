@@ -92,3 +92,4 @@ model_dir = './saved_models/sup_resnet18+128_cifar10_epo20_bs500_lr0.01_mom0.9_w
 out = "svhn"
 train_scores, in_scores, out_scores = anomaly_detection(model_dir, out)
 print(ood_metrics(in_scores, out_scores))
+
