@@ -124,6 +124,38 @@ class AnomalyDetectionAsymptoticMICL(AnomalyDetection):
         scores, _ = torch.min(preds, dim=1)
         return scores
 
+class AnomalyDetectionCompressiveLoss(AnomalyDetection):
+    def fit(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> None:
+        m, p = Z.shape
+        k = len(Y.unique())
+        self.m = m
+        self.k = k
+        self.eps = eps
+        self.mu = torch.zeros(k, p).cuda()
+        self.mj = torch.zeros(k).cuda()
+        self.inv_cov = torch.zeros(k, p, p).cuda()
+
+        identity = torch.eye(p).cuda()
+        for j in range(k):
+            Zj = Z[Y == j]
+            self.mj[j], _ = Zj.shape
+            self.mu[j] = torch.sum(Z, dim=0)
+            centered = Zj - self.mu[j]
+            sigma = centered.T.matmul(centered) / (self.mj[j] - 1)
+            self.inv_cov[j] = torch.inverse(identity + (p / eps) * sigma)
+    
+    def predict(self, Z: torch.tensor) -> torch.tensor:
+        m, p = Z.shape
+        k = self.k
+        preds = torch.zeros(m, k).cuda()
+        preds += torch.log2(self.mj / self.m)
+        for j in range(k):
+            centered = Z - self.mu[j]
+            preds[:, j] += self.mj[j] / 2 * torch.log2(1 + p / (self.mj[j] * self.eps) * torch.sum(centered * centered.matmul(self.inv_cov[j]), dim=1))
+        scores, _ = torch.min(preds, dim=1)
+        return scores
+
+
 class AnomalyDetectionSubspace(AnomalyDetection):
 
     def fit(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> None:
