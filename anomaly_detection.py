@@ -117,12 +117,12 @@ class AnomalyDetectionAsymptoticMICL(AnomalyDetection):
         m, p = Z.shape
         k = self.k
         preds = torch.zeros(m, k).cuda()
-        preds += torch.log2(self.mj / self.m) + self.eff_dim / 2
+        preds -= torch.log(self.mj / self.m) + self.eff_dim / 2
         for j in range(k):
             centered = Z - self.mu[j]
-            preds[:, j] += torch.log2(torch.sum(centered * centered.matmul(self.inv_covs[j]), dim=1))
-        scores, _ = torch.max(preds, dim=1)
-        return -scores
+            preds[:, j] += torch.sum(centered * centered.matmul(self.inv_covs[j]), dim=1)
+        scores, _ = torch.min(preds, dim=1)
+        return scores
 
 class AnomalyDetectionCompressiveLoss(AnomalyDetection):
     def fit(self, Z: torch.tensor, Y: torch.tensor, eps: float = 0.01) -> None:
